@@ -37,7 +37,9 @@ local CHROMA_FACTOR = {
 ---@param opts table Configuration
 ---@return string Adjusted hex color
 local function apply_weight(hex, bg, role, opts)
-	local target_contrast = WEIGHT[role] * (opts.variant == "light" and 3.8 or 4.5)
+	local variant = opts.variant or "dark"
+	local base_contrast = (variant == "light") and 3.8 or 4.5
+	local target_contrast = WEIGHT[role] * base_contrast
 	local contrasted = utils.ensure(hex, bg, target_contrast, opts)
 	return utils.scale_chroma(contrasted, CHROMA_FACTOR[role])
 end

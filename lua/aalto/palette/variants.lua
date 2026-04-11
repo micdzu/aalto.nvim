@@ -6,6 +6,9 @@
 --- - Light mode reduces contrast targets by 15%
 --- - Chroma boosted by 5% in light mode
 --- - Lightness clamped to L=0.80 to prevent washout
+---
+--- This module applies structural changes (dark ↔ light) and derives
+--- UI surfaces (bg_light, selection, cursorline) using OKLCH offsets.
 
 local utils = require("aalto.palette.utils")
 local M = {}
@@ -39,8 +42,9 @@ end
 ---@param src string Source hex color
 ---@param bg string Background hex color
 ---@param target_contrast number Original contrast target
+---@param opts table Configuration options (passed through to adjust_to_contrast)
 ---@return string Adjusted hex color
-local function derive_light_color(src, bg, target_contrast)
+local function derive_light_color(src, bg, target_contrast, opts)
 	local chroma_boosted = boost_chroma(src, LIGHT_CHROMA_BOOST)
 	local lightness_clamped = clamp_lightness(chroma_boosted, MAX_LIGHTNESS)
 	return utils.adjust_to_contrast(lightness_clamped, bg, target_contrast * LIGHT_CONTRAST_FACTOR, opts)
@@ -65,10 +69,10 @@ local SURFACE_CONFIG = {
 }
 
 --- Apply variant transformations with perceptual guarantees
----@param c table Raw palette
+---@param c table Raw palette (from base + overrides)
 ---@param variant "dark"|"light"
 ---@param opts table Configuration
----@return table Transformed palette
+---@return table Transformed palette (includes UI surfaces)
 function M.apply(c, variant, opts)
 	c = vim.tbl_deep_extend("force", {}, c) -- Work on copy
 	local base = require("aalto.palette.base").get()
@@ -79,18 +83,18 @@ function M.apply(c, variant, opts)
 			c.bg = "#DDD9E6"
 		end
 
-		-- Perceptually rebalance all colors
-		c.fg = derive_light_color(c.fg, c.bg, 4.5)
-		c.fg_dark = derive_light_color(c.fg_dark, c.bg, 3.0)
-		c.fg_light = derive_light_color(c.fg_light, c.bg, 4.5)
+		-- Perceptually rebalance all colors (pass opts to derive_light_color)
+		c.fg = derive_light_color(c.fg, c.bg, 4.5, opts)
+		c.fg_dark = derive_light_color(c.fg_dark, c.bg, 3.0, opts)
+		c.fg_light = derive_light_color(c.fg_light, c.bg, 4.5, opts)
 
-		-- Semantic roles (weights handled in semantic.lua)
-		c.blue = derive_light_color(c.blue, c.bg, 4.5)
-		c.green = derive_light_color(c.green, c.bg, 3.2)
-		c.magenta = derive_light_color(c.magenta, c.bg, 3.8)
-		c.red = derive_light_color(c.red, c.bg, 4.5)
-		c.orange = derive_light_color(c.orange, c.bg, 3.8)
-		c.cyan = derive_light_color(c.cyan, c.bg, 3.2)
+		-- Semantic roles (weights handled later in semantic.lua)
+		c.blue = derive_light_color(c.blue, c.bg, 4.5, opts)
+		c.green = derive_light_color(c.green, c.bg, 3.2, opts)
+		c.magenta = derive_light_color(c.magenta, c.bg, 3.8, opts)
+		c.red = derive_light_color(c.red, c.bg, 4.5, opts)
+		c.orange = derive_light_color(c.orange, c.bg, 3.8, opts)
+		c.cyan = derive_light_color(c.cyan, c.bg, 3.2, opts)
 	end
 
 	-- Derive UI surfaces

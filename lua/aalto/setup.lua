@@ -26,6 +26,7 @@
 ---   re-calling setup() does not double-merge defaults into defaults.
 --- - Removed fallback pipeline in build_palette() to ensure consistent
 ---   validation and avoid duplicated logic.
+--- - Removed redundant vim.g.colors_name assignment (now only in colors/aalto.lua).
 
 local M = {}
 
@@ -122,8 +123,8 @@ local function apply(palette, cfg)
 	-- It is called once in colors/aalto.lua before setup() is invoked.
 	-- Calling it again here would cause a double syntax reset and
 	-- potential flicker, and would re-trigger ColorScheme autocommands.
-
-	vim.g.colors_name = "aalto"
+	--
+	-- Also note: vim.g.colors_name is set in colors/aalto.lua, not here.
 
 	-- Resolve styles
 	local styles = vim.tbl_deep_extend("force", {}, defaults.styles, cfg.styles or {})
