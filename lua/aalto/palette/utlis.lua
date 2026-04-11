@@ -7,10 +7,21 @@
 --- - Contrast calculation (WCAG 2.x and APCA)
 --- - Gamut handling and chroma adjustment
 --- - Perceptual weight management
+--- - Caching for expensive conversions
 ---
 --- All functions are exposed for use in health checks, plugins, and customizations.
 
 local M = {}
+
+-- -----------------------------------------------
+-- CACHES FOR PERFORMANCE
+-- -----------------------------------------------
+
+---@type table<string, {L:number, C:number, h:number}>
+local oklch_cache = {}
+
+---@type table<string, number>
+local contrast_cache = {}
 
 -- -----------------------------------------------
 -- HEX ↔ RGB CONVERSION
@@ -94,6 +105,8 @@ end
 --- - C = Chroma (saturation, 0–~0.4 for sRGB)
 --- - h = Hue (0–360°)
 ---
+--- Results are cached for performance.
+---
 --- Example:
 ---   local lch = M.hex_to_oklch("#7C8CFA")
 ---   -- returns { L = 0.60, C = 0.15, h = 260.0 }
@@ -101,6 +114,12 @@ end
 ---@param hex string Hex color
 ---@return table { L, C, h } OKLCH coordinates
 function M.hex_to_oklch(hex)
+	-- Check cache first
+	if oklch_cache[hex] then
+		local cached = oklch_cache[hex]
+		return { L = cached.L, C = cached.C, h = cached.h }
+	end
+
 	local rgb = hex_to_rgb(hex)
 
 	-- Convert RGB to OKLab
@@ -113,13 +132,16 @@ function M.hex_to_oklch(hex)
 
 	local L = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s
 	local a = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s
-	local b = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s
+	local b_val = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s
 
-	local C = math.sqrt(a ^ 2 + b ^ 2)
-	local h = math.atan2(b, a)
+	local C = math.sqrt(a ^ 2 + b_val ^ 2)
+	local h = math.atan2(b_val, a)
 	if h < 0 then
 		h = h + 2 * math.pi
 	end
+
+	-- Cache result
+	oklch_cache[hex] = { L = L, C = C, h = h }
 
 	return { L = L, C = C, h = h }
 end
@@ -135,12 +157,12 @@ end
 ---@return string Hex color
 function M.oklch_to_hex(L, C, h)
 	local a = C * math.cos(h)
-	local b = C * math.sin(h)
+	local b_val = C * math.sin(h)
 
 	-- Convert OKLab to linear RGB
-	local l = (L + 0.3963377774 * a + 0.2158037573 * b) ^ 3
-	local m = (L - 0.1055613458 * a - 0.0638541728 * b) ^ 3
-	local s = (L - 0.0894841775 * a - 1.2914855480 * b) ^ 3
+	local l = (L + 0.3963377774 * a + 0.2158037573 * b_val) ^ 3
+	local m = (L - 0.1055613458 * a - 0.0638541728 * b_val) ^ 3
+	local s = (L - 0.0894841775 * a - 1.2914855480 * b_val) ^ 3
 
 	local r = 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s
 	local g = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s
@@ -250,6 +272,8 @@ end
 --- - 7.0: WCAG AAA normal text
 --- - 3.0: WCAG AA large text (18pt+)
 ---
+--- Results are cached for performance.
+---
 --- Example:
 ---   local ratio = M.contrast("#FFFFFF", "#000000")  -- returns 21.0
 ---
@@ -257,12 +281,21 @@ end
 ---@param bg string Hex background
 ---@return number Contrast ratio (≥1)
 function M.contrast(fg, bg)
+	-- Cache key
+	local key = fg .. "|" .. bg
+	if contrast_cache[key] then
+		return contrast_cache[key]
+	end
+
 	local L1 = luminance(fg)
 	local L2 = luminance(bg)
 	if L1 < L2 then
 		L1, L2 = L2, L1
 	end -- Ensure L1 is lighter
-	return (L1 + 0.05) / (L2 + 0.05)
+	local ratio = (L1 + 0.05) / (L2 + 0.05)
+
+	contrast_cache[key] = ratio
+	return ratio
 end
 
 --- Compute APCA contrast (WCAG 3).
@@ -412,6 +445,19 @@ function M.ensure(color, bg, target, opts)
 	end
 
 	return M.adjust_to_contrast(color, bg, required, opts)
+end
+
+-- -----------------------------------------------
+-- CACHE MANAGEMENT
+-- -----------------------------------------------
+
+---Clear all internal caches.
+---
+---Call this before rebuilding the palette to ensure fresh calculations.
+---Useful when base colors may have changed or during testing.
+function M.clear_cache()
+	oklch_cache = {}
+	contrast_cache = {}
 end
 
 -- Expose local functions for completeness

@@ -21,7 +21,7 @@ local M = {}
 ---Ensure commands are only created once.
 local commands_created = false
 
----Create user commands (:AaltoVariant, :AaltoAccessibility, :AaltoStatus)
+---Create user commands (:AaltoVariant, :AaltoAccessibility, :AaltoStatus, :AaltoReload, :AaltoPreview)
 local function create_commands()
 	if commands_created then
 		return
@@ -38,16 +38,15 @@ local function create_commands()
 	---Toggle or set variant (:AaltoVariant [dark|light])
 	vim.api.nvim_create_user_command("AaltoVariant", function(opts)
 		local cfg = setup.get_config() or {}
-		
+
 		-- Guard: ensure initialized
 		if not cfg.variant then
 			vim.notify("[aalto] Not initialized — call setup() first", vim.log.levels.ERROR)
 			return
 		end
-		
+
 		local current = cfg.variant or "dark"
-		local new = opts.args ~= "" and opts.args
-			or (current == "light" and "dark" or "light")
+		local new = opts.args ~= "" and opts.args or (current == "light" and "dark" or "light")
 
 		-- Validate
 		if new ~= "dark" and new ~= "light" then
@@ -92,6 +91,56 @@ local function create_commands()
 	vim.api.nvim_create_user_command("AaltoStatus", function()
 		toggle.status()
 	end, { desc = "Show Aalto status" })
+
+	-------------------------------------------------
+	-- RELOAD (NEW)
+	-------------------------------------------------
+
+	---Reload the colorscheme with the last used configuration.
+	---Useful after editing the config file.
+	vim.api.nvim_create_user_command("AaltoReload", function()
+		setup.reload()
+		vim.notify("[aalto] Configuration reloaded", vim.log.levels.INFO)
+	end, { desc = "Reload Aalto with last used configuration" })
+
+	-------------------------------------------------
+	-- PREVIEW (NEW)
+	-------------------------------------------------
+
+	---Temporarily preview a variant without saving it.
+	---Example: :AaltoPreview light
+	vim.api.nvim_create_user_command("AaltoPreview", function(opts)
+		local variant = opts.args
+		if variant ~= "dark" and variant ~= "light" then
+			vim.notify('[aalto] Preview requires "dark" or "light"', vim.log.levels.ERROR)
+			return
+		end
+
+		local cfg = setup.get_config()
+		if not cfg.variant then
+			vim.notify("[aalto] Not initialized — call setup() first", vim.log.levels.ERROR)
+			return
+		end
+
+		-- Build preview config without altering stored state
+		local preview_cfg = vim.tbl_deep_extend("force", {}, cfg, { variant = variant })
+		local palette_mod = require("aalto.palette")
+		local palette, err = palette_mod.build(preview_cfg)
+		if not palette then
+			vim.notify("[aalto] Preview failed: " .. (err or "unknown"), vim.log.levels.ERROR)
+			return
+		end
+
+		-- Apply highlights temporarily (config remains unchanged)
+		require("aalto.groups").apply(palette, preview_cfg)
+		vim.notify("[aalto] Previewing " .. variant .. " variant (not saved)", vim.log.levels.INFO)
+	end, {
+		nargs = 1,
+		complete = function()
+			return { "dark", "light" }
+		end,
+		desc = "Temporarily preview a variant without saving",
+	})
 end
 
 -------------------------------------------------
@@ -136,10 +185,7 @@ function M.lualine_theme(opts)
 
 	local palette = setup.get_palette()
 	if not palette or not palette.definition then
-		vim.notify(
-			"[aalto] lualine_theme() called before setup()",
-			vim.log.levels.WARN
-		)
+		vim.notify("[aalto] lualine_theme() called before setup()", vim.log.levels.WARN)
 		return {}
 	end
 

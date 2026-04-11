@@ -199,6 +199,17 @@ end
 ---@return table|nil palette The resolved semantic palette, nil on error
 ---@return string|nil error Error message if setup failed
 function M.setup(user_config)
+	-- Version guard: Neovim 0.9+ recommended for full LSP/treesitter support
+	if vim.fn.has("nvim-0.9") == 0 then
+		vim.notify(
+			"[aalto] Neovim 0.9+ recommended for full LSP semantic token and diagnostic support",
+			vim.log.levels.WARN
+		)
+	end
+
+	-- Clear internal caches to ensure fresh calculations on reload
+	require("aalto.palette.utils").clear_cache()
+
 	-- Cache the raw user config BEFORE merging with defaults.
 	-- This ensures reload() re-applies only the user's intent,
 	-- not defaults that were already baked in from a previous call.
