@@ -43,7 +43,7 @@ end
 local function derive_light_color(src, bg, target_contrast)
 	local chroma_boosted = boost_chroma(src, LIGHT_CHROMA_BOOST)
 	local lightness_clamped = clamp_lightness(chroma_boosted, MAX_LIGHTNESS)
-	return utils.adjust_to_contrast(lightness_clamped, bg, target_contrast * LIGHT_CONTRAST_FACTOR)
+	return utils.adjust_to_contrast(lightness_clamped, bg, target_contrast * LIGHT_CONTRAST_FACTOR, opts)
 end
 
 --- Configuration for UI surface derivation per variant.

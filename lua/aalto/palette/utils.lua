@@ -391,7 +391,14 @@ function M.adjust_to_contrast(hex, bg, target, opts)
 	local lighter_contrast = contrast_at(math.min(lch.L + delta, 1.0))
 	local increase = lighter_contrast > current
 
-	local low, high = increase and { lch.L, 1.0 } or { 0.0, lch.L }
+	-- BUGFIX: proper numeric assignment (was incorrectly using table syntax)
+	local low, high
+	if increase then
+		low, high = lch.L, 1.0
+	else
+		low, high = 0.0, lch.L
+	end
+
 	local best_L = lch.L
 
 	-- Binary search for optimal lightness
