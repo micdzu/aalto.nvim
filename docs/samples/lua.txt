@@ -1,0 +1,14 @@
+--[[
+    Computes n! recursively.
+    Lua's call stack is deep enough for this, barely.
+--]]
+local function factorial(n)
+    if n <= 1 then
+        return 1
+    end
+    return n * factorial(n - 1)
+end
+
+local n = 10
+print(string.format("factorial(%d) = %d", n, factorial(n)))
+-- 3628800. Lightweight, embeddable, and slightly quirky.

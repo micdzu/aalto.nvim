@@ -1,0 +1,326 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* These are overridden by JS – fallbacks only */
+  --aalto-definition: #6B7FD4;
+  --aalto-constant: #B87333;
+  --aalto-string: #7D8F6E;
+  --aalto-comment: #706873;
+  --aalto-fg: #EAE1D8;
+  --aalto-bg: #18122E;
+
+  /* Surfaces derived from bg (dark) */
+  --aalto-bg-light: #221C3A;
+  --aalto-selection: #2A2345;
+  --aalto-cursorline: #1D1733;
+
+  --transition-speed: 0.2s;
+}
+
+/* Light mode overrides – now unused; kept for completeness */
+[data-theme="light"] {
+  --aalto-definition: #5C63C0;
+  --aalto-constant: #8A5A3C;
+  --aalto-string: #61784F;
+  --aalto-comment: #9A948C;
+  --aalto-fg: #2B2740;
+  --aalto-bg: #F2EDE6;
+
+  --aalto-bg-light: #E6DFD4;
+  --aalto-selection: #DDD4C6;
+  --aalto-cursorline: #EDE7DD;
+}
+
+body {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  background: var(--aalto-bg);
+  color: var(--aalto-fg);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-speed), color var(--transition-speed);
+  line-height: 1.5;
+}
+
+.app {
+  max-width: 1400px;
+  width: 95%;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+header {
+  text-align: center;
+}
+
+h1 {
+  font-size: 3rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--aalto-comment);
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.variant-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 56px;
+  height: 28px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--aalto-bg-light);
+  border: 1px solid var(--aalto-cursorline);
+  transition: 0.2s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--aalto-fg);
+  transition: 0.2s;
+  border-radius: 50%;
+}
+
+input:checked + .slider:before {
+  transform: translateX(28px);
+}
+
+main {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.5rem;
+}
+
+.code-panel {
+  background: var(--aalto-bg-light);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid var(--aalto-selection);
+  overflow-x: auto;
+  transition: background-color var(--transition-speed);
+}
+
+.code-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+#language-select {
+  background: var(--aalto-selection);
+  color: var(--aalto-fg);
+  border: 1px solid var(--aalto-comment);
+  padding: 0.5rem 2rem 0.5rem 1rem;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23EAE1D8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 16px;
+}
+
+pre {
+  margin: 0;
+}
+
+code {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  font-family: inherit;
+  background: transparent !important;
+}
+
+/* Prism token styling – maps directly to semantic roles */
+.token.keyword,
+.token.operator,
+.token.punctuation,
+.token.attr-name,
+.token.script,
+.token.tag {
+  color: var(--aalto-fg) !important;
+}
+
+.token.function,
+.token.class-name,
+.token.maybe-class-name,
+.token.builtin,
+.token.type,
+.token.namespace {
+  color: var(--aalto-definition) !important;
+}
+
+.token.string,
+.token.char,
+.token.attr-value,
+.token.regex {
+  color: var(--aalto-string) !important;
+}
+
+.token.number,
+.token.boolean,
+.token.constant,
+.token.symbol,
+.token.unit {
+  color: var(--aalto-constant) !important;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: var(--aalto-comment) !important;
+  font-style: italic;
+}
+
+.palette-panel {
+  background: var(--aalto-bg-light);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid var(--aalto-cursorline);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.palette-panel h2 {
+  font-size: 1.4rem;
+  font-weight: 500;
+}
+
+.palette-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.palette-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-bottom: 1px dotted var(--aalto-selection);
+}
+
+.palette-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1px solid var(--aalto-comment);
+}
+
+.palette-value {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: monospace;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.palette-value:hover {
+  background: var(--aalto-selection);
+}
+
+.copy-icon {
+  opacity: 0.6;
+  font-size: 0.9rem;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: var(--aalto-comment);
+  text-align: center;
+}
+
+footer {
+  text-align: center;
+  padding-top: 1rem;
+}
+
+footer a {
+  color: var(--aalto-definition);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--aalto-definition);
+  color: var(--aalto-bg);
+  padding: 0.75rem 1.5rem;
+  border-radius: 40px;
+  font-weight: 500;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 1000;
+}
+
+.toast.hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(20px);
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+  h1 { font-size: 2.2rem; }
+  .app { width: 98%; margin: 1rem auto; }
+}

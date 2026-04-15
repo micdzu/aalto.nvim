@@ -1,0 +1,17 @@
+/// Computes the factorial of n.
+/// 
+/// Rust makes this safe and fast, but we're using recursion
+/// because we like to live dangerously (and n is small).
+fn factorial(n: u64) -> u64 {
+    match n {
+        0 | 1 => 1,
+        _ => n * factorial(n - 1),
+    }
+}
+
+fn main() {
+    let n = 10;
+    let result = factorial(n);
+    println!("The factorial of {} is {}", n, result);
+    // Output: 3628800. No overflow, no panic, just Rust being smug.
+}

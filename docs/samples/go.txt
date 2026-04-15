@@ -1,0 +1,18 @@
+package main
+
+import "fmt"
+
+// factorial computes n! recursively.
+// Go prefers loops, but we're feeling nostalgic.
+func factorial(n int) int {
+    if n <= 1 {
+        return 1
+    }
+    return n * factorial(n-1)
+}
+
+func main() {
+    n := 10
+    fmt.Printf("factorial(%d) = %d\n", n, factorial(n))
+    // 3628800. No drama, just Go being predictably reliable.
+}

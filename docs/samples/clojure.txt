@@ -1,0 +1,12 @@
+(ns aalto.demo)
+
+;; Computes the factorial of n using recursion.
+;; Lisp's parentheses are not excessive; they're *abundant*.
+(defn factorial [n]
+  (if (<= n 1)
+    1
+    (* n (factorial (dec n)))))
+
+(def n 10)
+(println (str "factorial(" n ") = " (factorial n)))
+;; 3628800. The parentheses are balanced. Your mind may not be.

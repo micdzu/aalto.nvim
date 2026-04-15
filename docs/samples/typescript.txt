@@ -1,0 +1,13 @@
+/**
+ * Computes the factorial of a number.
+ * TypeScript ensures we don't pass a string by accident.
+ * It cannot, however, prevent us from using recursion.
+ */
+function factorial(n: number): number {
+    if (n <= 1) return 1;
+    return n * factorial(n - 1);
+}
+
+const value: number = 10;
+console.log(`factorial(${value}) = ${factorial(value)}`);
+// 3628800. Properly typed and thoroughly transpiled.

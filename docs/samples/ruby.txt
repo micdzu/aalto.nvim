@@ -1,0 +1,9 @@
+# Computes the factorial of n.
+# Ruby makes everything feel like a friendly conversation.
+def factorial(n)
+  n <= 1 ? 1 : n * factorial(n - 1)
+end
+
+n = 10
+puts "factorial(#{n}) = #{factorial(n)}"
+# 3628800. Expressive, elegant, and secretly judging your indentation.

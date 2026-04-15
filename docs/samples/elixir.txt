@@ -1,0 +1,7 @@
+defmodule Factorial do
+  def of(0), do: 1
+  def of(n) when n > 0, do: n * of(n - 1)
+end
+
+IO.puts "factorial(10) = #{Factorial.of(10)}"
+# 3628800. Pattern matching makes this look like magic.

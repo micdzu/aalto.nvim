@@ -1,0 +1,17 @@
+#include <stdio.h>
+
+/**
+ * Computes the factorial of n using recursion.
+ * Real programmers use loops, but recursion looks smarter in code reviews.
+ */
+unsigned long long factorial(unsigned int n) {
+    if (n <= 1) return 1;
+    return n * factorial(n - 1);
+}
+
+int main() {
+    unsigned int n = 10;
+    printf("factorial(%u) = %llu\n", n, factorial(n));
+    // 3628800. No memory leaks, we promise. (We didn't allocate anything.)
+    return 0;
+}

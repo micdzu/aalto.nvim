@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aalto Showroom</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Prism.js for syntax highlighting (no theme CSS; we style everything) -->
+	<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-elixir.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-rust.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-lua.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-ruby.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-clojure.min.js"></script>
+
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Aalto Showroom</h1>
+      <p class="subtitle">A semantic colorscheme for Neovim — structure visible, noise gone</p>
+      <div class="variant-toggle">
+        <span>🌑 Dark</span>
+        <label class="switch">
+          <input type="checkbox" id="variant-checkbox">
+          <span class="slider"></span>
+        </label>
+        <span>🌕 Light</span>
+      </div>
+    </header>
+
+    <main>
+      <!-- Code Preview Panel -->
+      <div class="code-panel">
+        <div class="code-header">
+          <select id="language-select"></select>
+        </div>
+        <pre><code id="code-sample" class="language-rust"></code></pre>
+      </div>
+
+      <!-- Palette Panel -->
+      <div class="palette-panel">
+        <h2 id="palette-title">🎨 Dark Palette</h2>
+        <div class="palette-grid" id="palette-grid"></div>
+				<p class="hint">Click any hex value to copy it individually.</p>
+      </div>
+    </main>
+
+    <footer>
+      <a href="https://github.com/micdzu/aalto.nvim" target="_blank">github.com/micdzu/aalto.nvim</a>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast hidden">✨ Copied!</div>
+
+  <script src="app.js"></script>
+</body>
+</html>
